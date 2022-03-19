@@ -9,12 +9,6 @@ import (
 
 const UnshortRouterPath = "/unshort/:link"
 
-// UnshortRouter interface represents the functions which Short struct has
-type UnshortRouter interface {
-	UseStorage(*storage.Storage)
-	Get(c *gin.Context)
-}
-
 type Unshort struct {
 	storage *storage.Storage
 }

@@ -10,12 +10,6 @@ import (
 
 const ShortRouterPath = "/short/:link"
 
-// ShortRouter interface represents the functions which Short struct has
-type ShortRouter interface {
-	UseStorage(*storage.Storage)
-	Get(c *gin.Context)
-}
-
 // Short router itself
 type Short struct {
 	storage *storage.Storage
