@@ -6,14 +6,16 @@ import (
 
 const routerPath = "localhost:3000/unshort/"
 
+// Make shortened link, also returns the full path because it's easier to use like that.
 func Make(link string) (string, string) {
-	hashed := Hash(link)
+	hashed := hash(link)
 	result := routerPath + hashed
 
 	return hashed, result
 }
 
-func Hash(s string) string {
+// hash the string using djb2
+func hash(s string) string {
 	var h uint64 = 5381
 	bytes := []byte(s)
 

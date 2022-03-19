@@ -27,6 +27,7 @@ type Storage struct {
 	FilePath string
 }
 
+// Init does all the initialization when creating the storage object
 func (s *Storage) Init() {
 	var f *os.File
 	if _, err := os.Stat(s.FilePath); errors.Is(err, os.ErrNotExist) {
@@ -45,6 +46,7 @@ func (s *Storage) Init() {
 	s.loadFromFile()
 }
 
+// DumpToFile dumps json to file
 func (s *Storage) DumpToFile() {
 	s.saveToFile()
 }
@@ -108,6 +110,7 @@ func (s *Storage) saveToFile() {
 	}
 }
 
+// Contains returns whether our storage contains a given item
 func (s *Storage) Contains(link string) bool {
 	if _, ok := s.links[link]; ok {
 		return ok

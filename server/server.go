@@ -9,7 +9,6 @@ import (
 
 // Serv is an interface that describes available APIs for the Server struct
 type Serv interface {
-	_ImplementsServ()
 	AddGet(string, gin.HandlerFunc)
 	AddPost(string, gin.HandlerFunc)
 	AddPut(string, gin.HandlerFunc)
@@ -28,7 +27,6 @@ type Server struct {
 // Run does the setup and launches the server ready to do what it needs to do
 func (s *Server) Run() error {
 	s.doSetup()
-
 	return s.engine.Run(s.Address)
 }
 
@@ -56,9 +54,6 @@ func (s *Server) doSetup() {
 	s.AddGet(routers.UnshortRouterPath, s.unshortRouter.Get)
 
 }
-
-// _ImplementsServ exist to check that the interface is implemented, might delete later
-func (s *Server) _ImplementsServ() {}
 
 // AddGet Adds a get handler for a given link {path}
 func (s *Server) AddGet(path string, f gin.HandlerFunc) {
