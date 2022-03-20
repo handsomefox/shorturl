@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-const routerPath = "localhost:3000/unshort/"
+const routerPath = "localhost:3000/u/"
 
 // Make shortened link, also returns the full path because it's easier to use like that.
 func Make(link string) (string, string) {

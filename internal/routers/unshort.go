@@ -3,27 +3,27 @@ package routers
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"shorturl/storage"
+	"shorturl/internal/storage"
 	"strings"
 )
 
-// UnshortRouterPath is the path used for GET method
-const UnshortRouterPath = "/unshort/:link"
+// UnrollRouterPath is the path used for GET method
+const UnrollRouterPath = "/u/:link"
 
-// Unshort router itself
-type Unshort struct {
+// UnrollRouter router itself
+type UnrollRouter struct {
 	storage *storage.Storage
 }
 
 // Interface implementation
 
 // UseStorage points to the Storage for storing the links
-func (s *Unshort) UseStorage(storage *storage.Storage) {
+func (s *UnrollRouter) UseStorage(storage *storage.Storage) {
 	s.storage = storage
 }
 
 // Get redirects you to the original link
-func (s *Unshort) Get(c *gin.Context) {
+func (s *UnrollRouter) Get(c *gin.Context) {
 	link := c.Param("link")
 
 	found, err := s.storage.Get(link)

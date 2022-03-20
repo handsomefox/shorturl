@@ -11,11 +11,14 @@ import (
 // Model interface describes what functions are available to the Storage object
 type Model interface {
 	Init()
-	DumpToFile()
+
 	Store(string, string)
 	Delete(string)
 	Get(string) (string, error)
+
 	Contains(string) bool
+
+	DumpToFile()
 	loadFromFile()
 	saveToFile()
 }
@@ -29,20 +32,7 @@ type Storage struct {
 
 // Init does all the initialization when creating the storage object
 func (s *Storage) Init() {
-	var f *os.File
-	if _, err := os.Stat(s.FilePath); errors.Is(err, os.ErrNotExist) {
-		f, err = os.Create(s.FilePath)
-		if err != nil {
-			log.Fatal(err)
-			return
-		}
-		_, err = f.WriteString("{}")
-		if err != nil {
-			log.Fatal(err)
-			return
-		}
-	}
-	s.links = make(map[string]string)
+	s.createFileIfNeeded()
 	s.loadFromFile()
 }
 
@@ -84,6 +74,7 @@ func (s *Storage) loadFromFile() {
 		return
 	}
 
+	s.links = make(map[string]string)
 	err = json.Unmarshal(data, &s.links)
 
 	if err != nil {
@@ -116,4 +107,21 @@ func (s *Storage) Contains(link string) bool {
 		return ok
 	}
 	return false
+}
+
+// createFileIfNeeded Checks if the file exists and creates it if needed
+func (s *Storage) createFileIfNeeded() {
+	var f *os.File
+	if _, err := os.Stat(s.FilePath); errors.Is(err, os.ErrNotExist) {
+		f, err = os.Create(s.FilePath)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		_, err = f.WriteString("{}")
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+	}
 }

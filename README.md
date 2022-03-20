@@ -5,7 +5,7 @@ This is something like a URL-shortener, but links aren't really short, but whate
 
 ## How to use
 1. Launch the app
-2. Go to localhost:3000/short/{link that needs to get shorter}
+2. Go to localhost:3000/s/{link that needs to get shorter}
 3. You will get the "shortened" (not really short now, but whatever) link
 4. Open that link, and you will be redirected to the needed page 
 
