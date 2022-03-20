@@ -3,7 +3,6 @@ package server
 import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"shorturl/internal/routers"
 	"shorturl/internal/storage"
 )
 
@@ -20,18 +19,17 @@ type ShortURLServer struct {
 	Address      string
 	engine       *gin.Engine
 	storage      *storage.Storage
-	routerShort  *routers.ShortRouter
-	routerUnroll *routers.UnrollRouter
+	routerShort  *ShortRouter
+	routerUnroll *UnrollRouter
 }
 
 // Run does the setup and launches the server ready to do what it needs to do
 func (s *ShortURLServer) Run() error {
-	s.doSetup()
 	return s.engine.Run(s.Address)
 }
 
-// doSetup adds required routers and APIs before launching the server
-func (s *ShortURLServer) doSetup() {
+// Init adds required routers and APIs before launching the server
+func (s *ShortURLServer) Init() {
 	gin.SetMode(gin.ReleaseMode)
 	s.engine = gin.Default()
 
@@ -46,14 +44,13 @@ func (s *ShortURLServer) doSetup() {
 	s.storage.Init()
 
 	// Add routers here
-	s.routerShort = &routers.ShortRouter{}
+	s.routerShort = &ShortRouter{}
 	s.routerShort.UseStorage(s.storage)
-	s.AddGET(routers.ShortRouterPath, s.routerShort.Get)
+	s.AddGET(ShortRouterPath, s.routerShort.Get)
 
-	s.routerUnroll = &routers.UnrollRouter{}
+	s.routerUnroll = &UnrollRouter{}
 	s.routerUnroll.UseStorage(s.storage)
-	s.AddGET(routers.UnrollRouterPath, s.routerUnroll.Get)
-
+	s.AddGET(UnrollRouterPath, s.routerUnroll.Get)
 }
 
 // AddGET Adds a get handler for a given link {path}
