@@ -32,6 +32,7 @@ func (s *ShortURLServer) Run() error {
 
 // doSetup adds required routers and APIs before launching the server
 func (s *ShortURLServer) doSetup() {
+	gin.SetMode(gin.ReleaseMode)
 	s.engine = gin.Default()
 
 	s.engine.Use(cors.New(cors.Config{
