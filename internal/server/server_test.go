@@ -106,7 +106,7 @@ func TestPut(t *testing.T) {
 }
 
 type Index struct {
-	Id int
+	Id string `json:"Index"`
 }
 
 func TestDelete(t *testing.T) {
@@ -115,14 +115,15 @@ func TestDelete(t *testing.T) {
 	go func() {
 		s := ShortURLServer{Address: "localhost:3004"}
 		s.Init()
-		s.AddPUT("/del", func(context *gin.Context) {
+		s.AddDELETE("/del", func(context *gin.Context) {
 			var data Index
 			if err := context.BindJSON(&data); err != nil {
 				t.Error(err)
 				return
 			}
 			i, _ := strconv.Atoi(values["Index"])
-			if data.Id != i {
+			j, _ := strconv.Atoi(data.Id)
+			if j != i {
 				t.Error()
 				return
 			}
@@ -133,7 +134,7 @@ func TestDelete(t *testing.T) {
 
 	client := &http.Client{}
 	req, _ := http.NewRequest(http.MethodDelete, "http://localhost:3004/del", bytes.NewBuffer(jsonData))
-	req.Header.Set("Content-Type", "text/plain; charset=utf-8")
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	_, _ = client.Do(req)
 }
 
