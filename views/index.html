@@ -47,7 +47,7 @@
         const input = document.getElementById("basic-url-roll").value;
         if (isValidHttpUrl(input)) {
             const loc = window.location;
-            const resp = httpGet(loc.origin + "/s/" + removeSlashes(input));
+            const resp = httpGet(loc.origin + "/s/" + prepareString(input));
             const json = JSON.parse(resp);
             const link = json["link"];
             navigator.clipboard.writeText(link)
@@ -65,16 +65,21 @@
         }
         return url;
     }
-    function removeSlashes(string) {
+    function prepareString(string) {
         const url = getURL(string);
+        let str;
         if (url.protocol === "http:") {
-            return string.replace("http://", '')
+            str = string.replace("http://", '')
+        } else if (url.protocol === "https:") {
+            str = string.replace("https://", '')
         }
-        if (url.protocol === "https:") {
-            return string.replace("https://", '')
+        if (string.includes("/")) {
+            str = string.replaceAll("/", "|")
         }
-        return string;
+
+        return str;
     }
+
     function isValidHttpUrl(string) {
         const url = getURL(string);
         return url.protocol === "http:" || url.protocol === "https:" || url.protocol === "localhost:";

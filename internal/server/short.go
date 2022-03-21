@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"shorturl/internal/storage"
 	"shorturl/pkg/shortener"
+	"strings"
 )
 
 // ShortRouterPath is the path used for GET method
@@ -34,10 +35,15 @@ func (s *ShortRouter) Get(c *gin.Context) {
 		return
 	}
 
-	short, full := shortener.Make(c.Request.Host, parse.String())
+	str := parse.String()
+	if strings.Contains(str, "|") {
+		str = strings.ReplaceAll(str, "|", "/")
+	}
+
+	short, full := shortener.Make(c.Request.Host, str)
 
 	json := fmt.Sprintf("{\"link\": \"%s\"}", full)
 
 	c.Data(http.StatusOK, "application/json; charset=utf-8", []byte(json))
-	s.storage.Store(parse.String(), short)
+	s.storage.Store(str, short)
 }
