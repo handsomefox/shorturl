@@ -1,12 +1,13 @@
 package server
 
 import (
-	"github.com/gin-gonic/gin"
 	"shorturl/internal/storage"
+
+	"github.com/gin-gonic/gin"
 )
 
 // Route interface describes the functions that routers have, for now
 type Route interface {
-	UseStorage(*storage.Storage)
+	UseStorage(storage.Model)
 	Get(c *gin.Context)
 }
