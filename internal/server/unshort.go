@@ -29,6 +29,7 @@ func (s *UnrollRouter) Get(c *gin.Context) {
 
 	found, err := s.storage.Get(link)
 	if err != nil {
+		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 
