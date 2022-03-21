@@ -3,14 +3,16 @@ package server
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/gin-gonic/gin"
 	"io"
 	"log"
+	"net"
 	"net/http"
-	"shorturl/pkg/utils"
 	"strconv"
 	"strings"
 	"testing"
+	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 func StartServer(address string) {
@@ -25,7 +27,7 @@ func StartServer(address string) {
 func TestRunning(t *testing.T) {
 	go StartServer("localhost:3000")
 
-	err := utils.CheckServerState()
+	err := CheckServerState()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -152,4 +154,15 @@ func TestRouters(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+func CheckServerState() error {
+	host := "localhost"
+	port := "3000"
+	timeout := 1 * time.Second
+	_, err := net.DialTimeout("tcp", host+":"+port, timeout)
+	if err != nil {
+		return err
+	}
+	return nil
 }
