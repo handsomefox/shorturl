@@ -39,7 +39,7 @@ type Database struct {
 
 func (d *Database) Init() {
 	d.context = context.TODO()
-	uri := fmt.Sprintf("mongodb+srv://suicedek:%s@mongocluster.qkbsn.mongodb.net/myFirstDatabase?retryWrites=true&w=majority&tlsInsecure=true", d.Key)
+	uri := fmt.Sprintf("mongodb+srv://suicedek:%s@mongocluster.qkbsn.mongodb.net/myFirstDatabase?retryWrites=true&w=majority", d.Key)
 	clientOptions := options.Client().ApplyURI(uri)
 	client, err := mongo.Connect(d.context, clientOptions)
 	if err != nil {
