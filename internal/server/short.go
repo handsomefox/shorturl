@@ -3,7 +3,9 @@ package server
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
+	"net/url"
 	"shorturl/internal/storage"
 	"shorturl/pkg/shortener"
 )
@@ -25,25 +27,17 @@ func (s *ShortRouter) UseStorage(storage storage.Database) {
 
 // Get returns the shortened link
 func (s *ShortRouter) Get(c *gin.Context) {
-	link := c.Param("link")
+	parse, err := url.Parse(c.Param("link"))
 
-	short, full := shortener.Make(c.Request.Host, link)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
 
-	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(formatLinkToHtml(full)))
-	s.storage.Store(link, short)
-}
+	short, full := shortener.Make(c.Request.Host, parse.String())
 
-// Just makes it look better in the browser
-func formatLinkToHtml(link string) string {
-	onclick := "<script>function copyElementText(id) {var text = document.getElementById(id).innerText;var elem = " +
-		"document.createElement(\"textarea\");document.body.appendChild(elem);elem.value" +
-		" = text;elem.select();document.execCommand(\"copy\");document.body.removeChild(elem);}" +
-		"</script>"
+	json := fmt.Sprintf("{\"link\": \"%s\"}", full)
 
-	linkStyle := "\"text-align:center;position:fixed;top: 50%;left: 50%;margin-top: -50px;" +
-		"margin-left: -150px;background-color: red;color: white;padding: 1em 1.5em;text-decoration: none;\""
-
-	messageStyle := "\"text-align:center;position:fixed;top: 40%;left: 50%;margin-top: -50px;margin-left: -50px;\""
-
-	return fmt.Sprintf("<p style=%s>Click to copy!</p><p id=\"text\" onclick=\"copyElementText(this.id)\" style=%s>%s</p> %s", messageStyle, linkStyle, link, onclick)
+	c.Data(http.StatusOK, "application/json; charset=utf-8", []byte(json))
+	s.storage.Store(parse.String(), short)
 }
