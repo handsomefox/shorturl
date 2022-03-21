@@ -1,9 +1,10 @@
 package server
 
 import (
+	"shorturl/internal/storage"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"shorturl/internal/storage"
 )
 
 // Server is an interface that describes available APIs for the ShortURLServer struct
@@ -17,8 +18,9 @@ type Server interface {
 // ShortURLServer struct is the object required to start the application
 type ShortURLServer struct {
 	Address      string
+	DBKey        string
 	engine       *gin.Engine
-	storage      *storage.Storage
+	storage      storage.Database
 	routerShort  *ShortRouter
 	routerUnroll *UnrollRouter
 }
@@ -40,7 +42,7 @@ func (s *ShortURLServer) Init() {
 		AllowAllOrigins:  true,
 	}))
 
-	s.storage = &storage.Storage{FilePath: "C:\\Go\\Saved\\data.json"}
+	s.storage = storage.Database{Key: s.DBKey}
 	s.storage.Init()
 
 	// Add routers here

@@ -1,10 +1,11 @@
 package server
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"shorturl/internal/storage"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 // UnrollRouterPath is the path used for GET method
@@ -12,13 +13,13 @@ const UnrollRouterPath = "/u/:link"
 
 // UnrollRouter router itself
 type UnrollRouter struct {
-	storage *storage.Storage
+	storage storage.Database
 }
 
 // Interface implementation
 
-// UseStorage points to the Storage for storing the links
-func (s *UnrollRouter) UseStorage(storage *storage.Storage) {
+// UseStorage points to the File for storing the links
+func (s *UnrollRouter) UseStorage(storage storage.Database) {
 	s.storage = storage
 }
 
@@ -31,11 +32,11 @@ func (s *UnrollRouter) Get(c *gin.Context) {
 		return
 	}
 
-	if !strings.Contains(found, "http://") {
-		if !strings.Contains(found, "https://") {
-			found = "https://" + found
+	if !strings.Contains(found.URL, "http://") {
+		if !strings.Contains(found.URL, "https://") {
+			found.URL = "https://" + found.URL
 		}
 	}
-	c.Redirect(http.StatusPermanentRedirect, found)
+	c.Redirect(http.StatusPermanentRedirect, found.URL)
 	c.Abort()
 }

@@ -6,13 +6,17 @@ tasks:
     cmds:
       - GOFLAGS=-mod=mod go build -o bin/debug/ main.go
   build-release:
-    desc: Build the release version of the app
+    desc: Build the app without debug information
     cmds:
       -  GOFLAGS=-mod=mod go build -ldflags "-s -w" -o bin/release/ main.go
   run:
     desc: Run the app
     cmds:
       - GOFLAGS=-mod=mod go run main.go
+  run-release:
+    desc: Run the app without debug information
+    cmds:
+      - GOFLAGS=-mod=mod go run -ldflags "-s -w" main.go
   test:
     desc: Run the tests with coverage
     cmds:
