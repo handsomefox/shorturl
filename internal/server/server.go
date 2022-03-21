@@ -4,6 +4,7 @@ import (
 	"shorturl/internal/storage"
 
 	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 )
 
@@ -41,6 +42,8 @@ func (s *ShortURLServer) Init() {
 		AllowCredentials: true,
 		AllowAllOrigins:  true,
 	}))
+
+	s.engine.Use(static.Serve("/", static.LocalFile("./views", true)))
 
 	s.storage = storage.Database{Key: s.DBKey}
 	s.storage.Init()
