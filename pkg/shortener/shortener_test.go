@@ -13,7 +13,7 @@ func TestHash(t *testing.T) {
 }
 
 func TestMake(t *testing.T) {
-	hex, link := Make("string")
+	hex, link := Make("localhost:3000", "string")
 
 	if hex != "6531c93affc" {
 		t.Fatal()

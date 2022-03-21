@@ -2,11 +2,10 @@ package server
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"shorturl/internal/storage"
 	"shorturl/pkg/shortener"
-
-	"github.com/gin-gonic/gin"
 )
 
 // ShortRouterPath is the path used for GET method
@@ -28,7 +27,7 @@ func (s *ShortRouter) UseStorage(storage storage.Database) {
 func (s *ShortRouter) Get(c *gin.Context) {
 	link := c.Param("link")
 
-	short, full := shortener.Make(link)
+	short, full := shortener.Make(c.Request.Host, link)
 
 	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(formatLinkToHtml(full)))
 	s.storage.Store(link, short)

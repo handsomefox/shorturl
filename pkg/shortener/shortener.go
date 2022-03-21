@@ -4,12 +4,10 @@ import (
 	"fmt"
 )
 
-const routerPath = "localhost:3000/u/"
-
 // Make shortened link, also returns the full path because it's easier to use like that.
-func Make(link string) (string, string) {
+func Make(hostname string, link string) (string, string) {
 	hashed := hash(link)
-	result := routerPath + hashed
+	result := hostname + "/u/" + hashed
 
 	return hashed, result
 }
