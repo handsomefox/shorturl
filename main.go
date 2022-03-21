@@ -8,8 +8,18 @@ import (
 )
 
 func main() {
-	s := server.ShortURLServer{Address: ":8080", DBKey: os.Getenv("MONGO_KEY")}
+	port := os.Getenv("PORT")
+
+	if len(port) == 0 {
+		port = ":8080"
+	} else {
+		port = ":" + port
+	}
+
+	key := os.Getenv("MONGO_KEY")
+
+	s := server.ShortURLServer{Address: port, DBKey: key}
 	s.Init()
-	fmt.Println("Started the server at port 8080")
+	fmt.Printf("Started server at port: %s\n", port)
 	log.Fatal(s.Run())
 }
