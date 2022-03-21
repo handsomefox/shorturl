@@ -30,6 +30,12 @@ go build main.go
 go run main.go start-server dbkey
 ```
 
+Docker:
+
+```shell
+docker-compose up --build
+```
+
 Basic syntax:
 
 ```shell
