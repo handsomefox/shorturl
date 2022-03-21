@@ -56,9 +56,6 @@ func (d *Database) Init() {
 }
 
 func (d *Database) Store(full string, short string) {
-	if d.Contains(full) {
-		return
-	}
 	err := d.storeEntry(d.createEntry(full, short))
 
 	if err != nil {
@@ -95,16 +92,8 @@ func (d *Database) Contains(str string) bool {
 
 	if res.Err() != nil {
 		log.Panic(res.Err())
-	}
-
-	entry := Entry{}
-	err := res.Decode(&entry)
-
-	if err != nil {
-		log.Panic(err)
 		return false
 	}
-
 	return true
 }
 
