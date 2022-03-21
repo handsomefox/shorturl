@@ -48,7 +48,7 @@ func (d *Database) Init() {
 
 	err = client.Ping(d.context, nil)
 	if err != nil {
-		log.Panic(err)
+		log.Fatal(err)
 	}
 
 	d.collection = client.Database("shorturlDB").Collection("urls")
