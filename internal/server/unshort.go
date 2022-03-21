@@ -32,11 +32,16 @@ func (s *UnrollRouter) Get(c *gin.Context) {
 		return
 	}
 
-	if !strings.Contains(found.URL, "http://") {
-		if !strings.Contains(found.URL, "https://") {
+	if !strings.HasPrefix(found.URL, "http://") {
+		if !strings.HasPrefix(found.URL, "https://") {
 			found.URL = "https://" + found.URL
 		}
 	}
+
+	if strings.HasPrefix(found.URL, "localhost:") {
+		found.URL = "http://" + found.URL
+	}
+
 	c.Redirect(http.StatusPermanentRedirect, found.URL)
 	c.Abort()
 }
