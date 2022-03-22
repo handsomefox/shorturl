@@ -21,9 +21,9 @@ type ShortURLServer struct {
 	Address      string
 	DBKey        string
 	engine       *gin.Engine
-	storage      storage.Database
-	routerShort  *ShortRouter
-	routerUnroll *UnrollRouter
+	storage      storage.Model
+	routerShort  Route
+	routerUnroll Route
 }
 
 // Run does the setup and launches the server ready to do what it needs to do
@@ -32,7 +32,7 @@ func (s *ShortURLServer) Run() error {
 }
 
 // Init adds required routers and APIs before launching the server
-func (s *ShortURLServer) Init() {
+func (s *ShortURLServer) Init() error {
 	gin.SetMode(gin.ReleaseMode)
 	s.engine = gin.Default()
 
@@ -45,17 +45,20 @@ func (s *ShortURLServer) Init() {
 
 	s.engine.Use(static.Serve("/", static.LocalFile("./views", true)))
 
-	s.storage = storage.Database{Key: s.DBKey}
-	s.storage.Init()
+	s.storage = &storage.Database{Key: s.DBKey}
+	err := s.storage.Init()
+
+	if err != nil {
+		return err
+	}
 
 	// Add routers here
-	s.routerShort = &ShortRouter{}
-	s.routerShort.UseStorage(s.storage)
+	s.routerShort = &ShortRouter{storage: s.storage}
 	s.AddGET(ShortRouterPath, s.routerShort.Get)
 
-	s.routerUnroll = &UnrollRouter{}
-	s.routerUnroll.UseStorage(s.storage)
+	s.routerUnroll = &UnrollRouter{storage: s.storage}
 	s.AddGET(UnrollRouterPath, s.routerUnroll.Get)
+	return nil
 }
 
 // AddGET Adds a get handler for a given link {path}
