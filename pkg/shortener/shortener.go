@@ -5,11 +5,8 @@ import (
 )
 
 // Make shortened link, also returns the full path because it's easier to use like that.
-func Make(hostname string, link string) (string, string) {
-	hashed := hash(link)
-	result := hostname + "/u/" + hashed
-
-	return hashed, result
+func Make(link string) string {
+	return hash(link)
 }
 
 // hash the string using djb2
