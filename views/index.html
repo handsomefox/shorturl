@@ -67,15 +67,16 @@
     }
     function prepareString(string) {
         const url = getURL(string);
-        let str;
+        let str = string;
         if (url.protocol === "http:") {
-            str = string.replace("http://", '')
+            str = str.replace("http://", '')
         } else if (url.protocol === "https:") {
-            str = string.replace("https://", '')
+            str = str.replace("https://", '')
         }
-        if (string.includes("/")) {
-            str = string.replaceAll("/", "|")
-        }
+        str = str.replaceAll("/", "|")
+        str = str.replaceAll("?", "{")
+        str = str.replaceAll("=", "}")
+        str = str.replaceAll("&", "[")
 
         return str;
     }

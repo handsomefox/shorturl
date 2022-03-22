@@ -3,7 +3,6 @@ package server
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
 	"net/url"
 	"shorturl/internal/storage"
@@ -28,22 +27,23 @@ func (s *ShortRouter) UseStorage(storage storage.Database) {
 
 // Get returns the shortened link
 func (s *ShortRouter) Get(c *gin.Context) {
-	parse, err := url.Parse(c.Param("link"))
+	str := c.Param("link")
+	_, err := url.Parse(str)
 
 	if err != nil {
-		log.Fatal(err)
+		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 
-	str := parse.String()
-	if strings.Contains(str, "|") {
-		str = strings.ReplaceAll(str, "|", "/")
-	}
+	str = strings.ReplaceAll(str, "|", "/")
+	str = strings.ReplaceAll(str, "{", "?")
+	str = strings.ReplaceAll(str, "}", "=")
+	str = strings.ReplaceAll(str, "[", "&")
 
 	short, full := shortener.Make(c.Request.Host, str)
 
-	json := fmt.Sprintf("{\"link\": \"%s\"}", full)
+	data := fmt.Sprintf("{\"link\": \"%s\"}", full)
 
-	c.Data(http.StatusOK, "application/json; charset=utf-8", []byte(json))
+	c.Data(http.StatusOK, "application/json; charset=utf-8", []byte(data))
 	s.storage.Store(str, short)
 }
