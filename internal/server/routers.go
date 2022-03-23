@@ -91,7 +91,7 @@ func (s *ShortRouter) sendResponse(c *gin.Context, full string) {
 func (s *UnrollRouter) Get(c *gin.Context) {
 	link := c.Param("link")
 
-	if !isValidURL(link) {
+	if !isValidURL(addSchemePrefixIfNeeded(link)) {
 		handleError(c, http.StatusBadRequest)
 		return
 	}
@@ -113,9 +113,6 @@ func addSchemePrefixIfNeeded(str string) string {
 		str = "https://" + str
 	}
 
-	if strings.HasPrefix(str, "localhost:") {
-		str = "http://" + str
-	}
 	return str
 }
 
