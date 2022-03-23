@@ -71,10 +71,10 @@ func (s *ShortRouter) prepareLink(link string) string {
 	return link
 }
 
-func (s *ShortRouter) makeAndStore(c *gin.Context, link string) (string, error) {
-	hash := shortener.Make(link)
+func (s *ShortRouter) makeAndStore(c *gin.Context, URL string) (string, error) {
+	hash := shortener.Make(URL)
 	full := s.appendHostname(c, hash)
-	err := s.storage.Store(hash, full)
+	err := s.storage.Store(hash, URL)
 	return full, err
 }
 

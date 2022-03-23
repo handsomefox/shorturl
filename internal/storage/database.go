@@ -54,8 +54,8 @@ func (d *Database) Init() error {
 	return nil
 }
 
-func (d *Database) Store(short string, full string) error {
-	err := d.storeEntry(d.createEntry(full, short))
+func (d *Database) Store(hash string, URL string) error {
+	err := d.storeEntry(d.createEntry(hash, URL))
 	return err
 }
 func (d *Database) Delete(id int) error {
@@ -93,11 +93,11 @@ func (d *Database) storeEntry(entry *Entry) error {
 	return err
 }
 
-func (d *Database) createEntry(short string, full string) *Entry {
+func (d *Database) createEntry(hash string, URL string) *Entry {
 	return &Entry{
 		ID:        primitive.NewObjectID(),
 		CreatedAt: time.Now(),
-		Short:     short,
-		URL:       full,
+		Short:     hash,
+		URL:       URL,
 	}
 }
