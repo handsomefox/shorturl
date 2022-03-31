@@ -27,8 +27,8 @@ task run
 GoBuild:
 
 ```shell
-go build main.go
-go run main.go
+go build cmd/shorturl/main.go
+go run   cmd/shorturl/main.go
 ```
 
 Docker:
