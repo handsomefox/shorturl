@@ -1,7 +1,8 @@
 package server
 
 import (
-	"shorturl/internal/storage"
+	"os"
+	"shorturl/pkg/storage"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/static"
@@ -43,7 +44,8 @@ func (s *ShortURLServer) Init() error {
 		AllowAllOrigins:  true,
 	}))
 
-	s.engine.Use(static.Serve("/", static.LocalFile("./views", true)))
+	viewPath := os.Getenv("VIEW_PATH")
+	s.engine.Use(static.Serve("/", static.LocalFile(viewPath, true)))
 
 	s.storage = &storage.Database{Key: s.DBKey}
 	err := s.storage.Init()

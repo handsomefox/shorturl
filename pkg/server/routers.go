@@ -5,8 +5,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"net/http"
 	"net/url"
-	"shorturl/internal/storage"
-	"shorturl/pkg/shortener"
+	"shorturl/pkg/shorturl"
+	"shorturl/pkg/storage"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -72,7 +72,7 @@ func (s *ShortRouter) prepareLink(link string) string {
 }
 
 func (s *ShortRouter) makeAndStore(c *gin.Context, URL string) (string, error) {
-	hash := shortener.Make(URL)
+	hash := shorturl.Make(URL)
 	full := s.appendHostname(c, hash)
 	err := s.storage.Store(hash, URL)
 	return full, err

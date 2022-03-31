@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"shorturl/internal/server"
+	"shorturl/pkg/server"
 )
 
 func main() {
@@ -25,7 +25,6 @@ func main() {
 		log.Fatal(err)
 		return
 	}
-
 	fmt.Printf("Started server at port: %s\n", port)
 	log.Fatal(s.Run())
 }

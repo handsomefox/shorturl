@@ -1,4 +1,4 @@
-package shortener
+package shorturl
 
 import (
 	"fmt"
