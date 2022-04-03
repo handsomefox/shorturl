@@ -43,19 +43,23 @@
         xmlHttp.send(null);
         return xmlHttp.responseText;
     }
+
     function handleRoll() {
         const input = document.getElementById("basic-url-roll").value;
-        if (isValidHttpUrl(input)) {
-            const loc = window.location;
-            const resp = httpGet(loc.origin + "/s/" + prepareString(input));
-            const json = JSON.parse(resp);
-            const link = json["link"];
-            navigator.clipboard.writeText(link)
-            alert("Copied link to clipboard! Link: " + link)
-        } else {
-            alert("Enter a valid http or https URL");
+
+        if (!isValidHttpUrl(input)) {
+            alert("Enter a valid URL!")
+            return
         }
+
+        const req = window.location.origin + "/s/" + base64URLEncode(input);
+        const resp = httpGet(req);
+        const json = JSON.parse(resp);
+        const link = json["link"];
+        navigator.clipboard.writeText(link)
+        alert("Copied link to clipboard! Link: " + link)
     }
+
     function getURL(string) {
         let url;
         try {
@@ -65,20 +69,9 @@
         }
         return url;
     }
-    function prepareString(string) {
-        const url = getURL(string);
-        let str = string;
-        if (url.protocol === "http:") {
-            str = str.replace("http://", '')
-        } else if (url.protocol === "https:") {
-            str = str.replace("https://", '')
-        }
-        str = str.replaceAll("/", "|")
-        str = str.replaceAll("?", "{")
-        str = str.replaceAll("=", "}")
-        str = str.replaceAll("&", "[")
 
-        return str;
+    function base64URLEncode(str) {
+        return btoa(str).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
     }
 
     function isValidHttpUrl(string) {
@@ -91,6 +84,7 @@
         box-sizing: border-box;
         font-family: 'Lato', sans-serif, Arial;
     }
+
     body {
         background: linear-gradient(45deg, rgb(1, 0, 22) 0%, rgb(7, 60, 97) 50%, rgb(8, 149, 201) 100%);
     }

@@ -2,14 +2,14 @@ package server
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+	"log"
 	"net/http"
 	"net/url"
+	"shorturl/pkg/encoding"
 	"shorturl/pkg/shorturl"
 	"shorturl/pkg/storage"
-	"strings"
-
-	"github.com/gin-gonic/gin"
 )
 
 // Route interface describes the functions that routers have, for now
@@ -37,44 +37,64 @@ type UnrollRouter struct {
 
 // Get returns the shortened link
 func (s *ShortRouter) Get(c *gin.Context) {
-	str := s.prepareLink(c.Param("link"))
+	// Receive a base64 encoded URL.
+	encoded := c.Param("link")
+	// Decode it.
+	decoder := encoding.NewDecoder()
+	decoded, err := decoder.Decode(encoded)
 
-	if !isValidURL(str) {
+	log.Printf("Recieved URL: %s\n", decoded)
+
+	if err != nil {
+		handleError(c, http.StatusInternalServerError)
+		return
+	}
+
+	// Check if URL is valid.
+	if !isValidURL(decoded) {
 		handleError(c, http.StatusBadRequest)
 		return
 	}
 
-	if isDuplicate(s.storage, str) {
-		link, err := getExistingShortLink(s.storage, str)
+	// Check if we already store that URL.
+	if isDuplicate(s.storage, decoded) {
+		dup, err := getExistingShortLink(s.storage, decoded)
 		if err != nil {
-			handleError(c, http.StatusNotFound)
+			handleError(c, http.StatusInternalServerError)
 			return
 		}
-		s.sendResponse(c, s.appendHostname(c, link))
+		// Return existing URL instead.
+		s.sendResponse(c, s.appendHostname(c, dup))
 		return
 	}
 
-	responseLink, err := s.makeAndStore(c, str)
+	// Create a short link and store it in the database.
+	responseLink, err := s.makeAndStore(c, decoded)
+	log.Printf("Sending Reponse: %s\n", responseLink)
 	if err != nil {
 		handleError(c, http.StatusBadGateway)
 		return
 	}
 
+	// Send the link.
 	s.sendResponse(c, responseLink)
 }
 
-func (s *ShortRouter) prepareLink(link string) string {
-	link = strings.ReplaceAll(link, "|", "/")
-	link = strings.ReplaceAll(link, "{", "?")
-	link = strings.ReplaceAll(link, "}", "=")
-	link = strings.ReplaceAll(link, "[", "&")
-	return link
-}
-
 func (s *ShortRouter) makeAndStore(c *gin.Context, URL string) (string, error) {
+	// Generate a hash from URL.
 	hash := shorturl.Make(URL)
-	full := s.appendHostname(c, hash)
+
+	// Store the hash.
 	err := s.storage.Store(hash, URL)
+
+	log.Printf("Stored the hash: %s\n", hash)
+
+	// Encode it for the link.
+	encoder := encoding.NewEncoder()
+	encoded := encoder.Encode(hash)
+
+	// Add a hostname so the hash can be used as a link.
+	full := s.appendHostname(c, encoded)
 	return full, err
 }
 
@@ -89,31 +109,27 @@ func (s *ShortRouter) sendResponse(c *gin.Context, full string) {
 
 // Get redirects you to the original link
 func (s *UnrollRouter) Get(c *gin.Context) {
-	link := c.Param("link")
+	// Get a base64 encoded hash.
+	b64 := c.Param("link")
 
-	if !isValidURL(addSchemePrefixIfNeeded(link)) {
-		handleError(c, http.StatusBadRequest)
+	// Decode the hash.
+	decoder := encoding.NewDecoder()
+	hash, err := decoder.Decode(b64)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError)
 		return
 	}
 
-	found, err := s.storage.Get(bson.M{"short": link})
+	// Search the hash in database.
+	found, err := s.storage.Get(bson.M{"short": hash})
 	if err != nil {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 
-	found.URL = addSchemePrefixIfNeeded(found.URL)
-
+	// Return the found URL.
 	c.Redirect(http.StatusPermanentRedirect, found.URL)
 	c.Abort()
-}
-
-func addSchemePrefixIfNeeded(str string) string {
-	if !strings.HasPrefix(str, "http://") || !strings.HasPrefix(str, "https://") {
-		str = "https://" + str
-	}
-
-	return str
 }
 
 func handleError(c *gin.Context, HTTPStatus int) {
