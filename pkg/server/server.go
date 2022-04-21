@@ -2,6 +2,7 @@ package server
 
 import (
 	"os"
+	"shorturl/pkg/handlers"
 	"shorturl/pkg/storage"
 
 	"github.com/gin-contrib/cors"
@@ -9,34 +10,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Server is an interface that describes available APIs for the ShortURLServer struct
-type Server interface {
-	AddGET(string, gin.HandlerFunc)
-	AddPOST(string, gin.HandlerFunc)
-	AddPUT(string, gin.HandlerFunc)
-	AddDELETE(string, gin.HandlerFunc)
+// MongoServer struct is the object required to start the application
+type MongoServer struct {
+	Address string
+	DBKey   string
+	engine  *gin.Engine
+	storage storage.LinkStorage
 }
 
-// ShortURLServer struct is the object required to start the application
-type ShortURLServer struct {
-	Address      string
-	DBKey        string
-	engine       *gin.Engine
-	storage      storage.Model
-	routerShort  Route
-	routerUnroll Route
-}
-
-// Run does the setup and launches the server ready to do what it needs to do
-func (s *ShortURLServer) Run() error {
-	return s.engine.Run(s.Address)
-}
-
-// Init adds required routers and APIs before launching the server
-func (s *ShortURLServer) Init() error {
+// New returns a new MongoServer with given parameters
+func New(address string, dbKey string) *MongoServer {
 	gin.SetMode(gin.ReleaseMode)
-	s.engine = gin.Default()
-
+	s := &MongoServer{
+		Address: address,
+		DBKey:   dbKey,
+		engine:  gin.Default(),
+		storage: &storage.Database{Key: dbKey},
+	}
 	s.engine.Use(cors.New(cors.Config{
 		AllowHeaders:     []string{"Origin"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -46,39 +36,23 @@ func (s *ShortURLServer) Init() error {
 
 	viewPath := os.Getenv("VIEW_PATH")
 	s.engine.Use(static.Serve("/", static.LocalFile(viewPath, true)))
+	return s
+}
 
-	s.storage = &storage.Database{Key: s.DBKey}
-	err := s.storage.Init()
+// Run launches the server and catches errors
+func (s *MongoServer) Run() error {
+	return s.engine.Run(s.Address)
+}
 
-	if err != nil {
+// Init adds required routers and initializes the storage
+func (s *MongoServer) Init() error {
+	if err := s.storage.Init(); err != nil {
 		return err
 	}
 
-	// Add routers here
-	s.routerShort = &ShortRouter{storage: s.storage}
-	s.AddGET(ShortRouterPath, s.routerShort.Get)
+	h := handlers.New(s.storage)
+	s.engine.GET(handlers.GetShortenedPath, h.GetShortened)
+	s.engine.GET(handlers.GetUnshortenedPath, h.GetUnshortened)
 
-	s.routerUnroll = &UnrollRouter{storage: s.storage}
-	s.AddGET(UnrollRouterPath, s.routerUnroll.Get)
 	return nil
-}
-
-// AddGET Adds a get handler for a given link {path}
-func (s *ShortURLServer) AddGET(path string, f gin.HandlerFunc) {
-	s.engine.GET(path, f)
-}
-
-// AddPOST Adds a post handler for a given link {path}
-func (s *ShortURLServer) AddPOST(path string, f gin.HandlerFunc) {
-	s.engine.POST(path, f)
-}
-
-// AddPUT Adds a put handler for a given link {path}
-func (s *ShortURLServer) AddPUT(path string, f gin.HandlerFunc) {
-	s.engine.PUT(path, f)
-}
-
-// AddDELETE Adds a delete handler for a given link {path}
-func (s *ShortURLServer) AddDELETE(path string, f gin.HandlerFunc) {
-	s.engine.DELETE(path, f)
 }

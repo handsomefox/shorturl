@@ -3,39 +3,39 @@ package storage
 import (
 	"context"
 	"fmt"
-	"time"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"time"
 )
 
-// Entry describes a MongoDB entry.
-type Entry struct {
-	ID        primitive.ObjectID `bson:"_id"`
-	CreatedAt time.Time          `bson:"created_at"`
-	Short     string             `bson:"short"`
-	URL       string             `bson:"url"`
-}
-
-// Model interface describes what functions are available to the File object
-type Model interface {
-	Init() error
-
-	Store(string, string) error
-	Delete(int) error
-	Get(interface{}) (Entry, error)
-
-	Contains(string) bool
-}
-
+// Database implements LinkStorage interface using a (mongo) database for storing data.
 type Database struct {
 	Key        string
 	collection *mongo.Collection
 	context    context.Context
 }
 
+// DatabaseEntry describes a MongoDB entry.
+type DatabaseEntry struct {
+	ID        primitive.ObjectID `bson:"_id"`
+	CreatedAt time.Time          `bson:"created_at"`
+	Short     string             `bson:"short"`
+	URL       string             `bson:"url"`
+}
+
+// createEntry used to create a database entry.
+func createEntry(hash string, URL string) *DatabaseEntry {
+	return &DatabaseEntry{
+		ID:        primitive.NewObjectID(),
+		CreatedAt: time.Now(),
+		Short:     hash,
+		URL:       URL,
+	}
+}
+
+// Init connects to the database.
 func (d *Database) Init() error {
 	d.context = context.TODO()
 	uri := fmt.Sprintf("mongodb+srv://suicedek:%s@mongocluster.qkbsn.mongodb.net/myFirstDatabase?retryWrites=true&w=majority", d.Key)
@@ -54,31 +54,38 @@ func (d *Database) Init() error {
 	return nil
 }
 
+// Store stores the data in storage.
 func (d *Database) Store(hash string, URL string) error {
-	err := d.storeEntry(d.createEntry(hash, URL))
+	entry := createEntry(hash, URL)
+	_, err := d.collection.InsertOne(d.context, entry)
 	return err
 }
+
+// Delete removes data from the storage.
 func (d *Database) Delete(id int) error {
 	_, err := d.collection.DeleteOne(d.context, bson.M{"_id": id})
 	return err
 }
 
-func (d *Database) Get(filter interface{}) (Entry, error) {
+// Get searches the storage for the entry using given filter.
+func (d *Database) Get(filter interface{}) (DatabaseEntry, error) {
 	res := d.collection.FindOne(d.context, filter)
 
 	if res.Err() != nil {
-		return Entry{}, res.Err()
+		return DatabaseEntry{}, res.Err()
 	}
 
-	entry := Entry{}
+	entry := DatabaseEntry{}
 	err := res.Decode(&entry)
 
 	if err != nil {
-		return Entry{}, err
+		return DatabaseEntry{}, err
 	}
 
 	return entry, nil
 }
+
+// Contains checks if the storage contains the URL.
 func (d *Database) Contains(str string) bool {
 	res := d.collection.FindOne(d.context, bson.M{"url": str})
 
@@ -86,18 +93,4 @@ func (d *Database) Contains(str string) bool {
 		return false
 	}
 	return true
-}
-
-func (d *Database) storeEntry(entry *Entry) error {
-	_, err := d.collection.InsertOne(d.context, entry)
-	return err
-}
-
-func (d *Database) createEntry(hash string, URL string) *Entry {
-	return &Entry{
-		ID:        primitive.NewObjectID(),
-		CreatedAt: time.Now(),
-		Short:     hash,
-		URL:       URL,
-	}
 }
