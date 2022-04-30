@@ -1,4 +1,5 @@
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +11,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
     <title>ShortURL</title>
 </head>
+
 <body>
+
 <nav class="navbar navbar-dark bg-dark">
     <div class="container-fluid">
         <div class="navbar-header">
@@ -18,23 +21,23 @@
         </div>
     </div>
 </nav>
-<div class="container h-75 d-flex">
-    <div class="m-auto w-50 row">
-        <label class="text-white text-center" for="basic-url-roll">Link will be copied to clipboard
-            automatically!</label>
-        <div class="align-items-center input-group mb-3">
-            <input id="basic-url-roll" type="url" class="form-control" placeholder="URL to get rolled">
-            <div class="input-group-append">
-                <button class="btn btn-success" type="submit" onclick="handleRoll()">Go!</button>
-            </div>
+
+<div class="h-75 d-flex justify-content-center align-items-center">
+    <form class="form-inline">
+        <div class="form-group mb-2">
+            <label class="text-white" for="basic-url-roll">Link will be copied to clipboard automatically!</label>
+            <input type="url" class="form-control" id="basic-url-roll" placeholder="Enter URL!">
         </div>
-    </div>
+        <button type="submit" class="float-end btn btn-primary" onclick="handleRoll()">Submit</button>
+    </form>
 </div>
+
 <footer class="bg-dark text-center text-white align-bottom position-absolute bottom-0 w-100">
     <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2);">
         <a class="text-white" href="https://github.com/handsomefox">2022 © Suicedek</a>
     </div>
 </footer>
+
 </body>
 <script>
     function httpGet(url) {
@@ -89,4 +92,5 @@
         background: linear-gradient(45deg, rgb(1, 0, 22) 0%, rgb(7, 60, 97) 50%, rgb(8, 149, 201) 100%);
     }
 </style>
+
 </html>

@@ -24,13 +24,11 @@ func main() {
 		log.Fatal("no database key was provided")
 	}
 
-	s := server.ShortURLServer{Address: port, DBKey: key}
-	err := s.Init()
-
-	if err != nil {
+	s := server.New(port, key)
+	if err := s.Init(); err != nil {
 		log.Fatal(err)
-		return
 	}
+
 	fmt.Printf("Started server at port: %s\n", port)
 	log.Fatal(s.Run())
 }
